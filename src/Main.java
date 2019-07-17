@@ -1,6 +1,9 @@
 import DataFetcher.FetchedData;
 import DataStructures.DayWeather;
+import DataStructures.TimeAtMoment;
 import Utility.Utils;
+
+import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
@@ -8,10 +11,6 @@ public class Main {
         debug();
     }
     private static void debug() {
-        System.out.println(FetchedData.currentWeather);
-        System.out.println(FetchedData.hourWeathers.size());
-        for(DayWeather d : FetchedData.dayWeathers) {
-            System.out.println(d);
-        }
+        TimeAtMoment timeAtMoment = new TimeAtMoment(FetchedData.currentWeather.getTime());
     }
 }
