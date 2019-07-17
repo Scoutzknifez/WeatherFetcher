@@ -1,7 +1,12 @@
 package DataStructures;
 
 public class HourWeather extends HumidWeather{
-    public HourWeather(String summary, String icon, double temperature, double humidity) {
-        super(summary, icon, temperature, humidity);
+    public HourWeather(long time, String summary, String icon, double temperature, double humidity) {
+        super(time, summary, icon, temperature, humidity);
+    }
+
+    @Override
+    public String toString() {
+        return "Hour:{time:" + getTime() + ",summary:" + getSummary() + ",icon:" + getIcon() + ",temperature:" + getTemperature() + ",humidity:" + getHumidity() + "}";
     }
 }
