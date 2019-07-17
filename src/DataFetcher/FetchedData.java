@@ -10,5 +10,5 @@ public class FetchedData {
     // Last fetched and parsed data
     public static CurrentWeather currentWeather = null;
     public static ArrayList<HourWeather> hourWeathers = null; // Appears to be always length 169 aka index 0 - 168 inclusive
-    public static ArrayList<DayWeather> dayWeathers = null;
+    public static ArrayList<DayWeather> dayWeathers = null; // Index 0 is today, index 7 is one week from today
 }
