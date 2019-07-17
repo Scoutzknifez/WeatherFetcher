@@ -43,11 +43,11 @@ public class Main {
             JsonNode dailyDataNode = dailyNode.path("data");
             Iterator<JsonNode> days = dailyDataNode.elements();
 
-            System.out.println(currentNode);
-            System.out.println(dailyDataNode);
+            //System.out.println(currentNode);
+            //System.out.println(dailyDataNode);
             while (days.hasNext()) {
                 JsonNode day = days.next();
-                System.out.println(day);
+                //System.out.println(day);
             }
 
         } catch (Exception e) {
