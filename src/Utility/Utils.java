@@ -7,7 +7,7 @@ import java.net.Socket;
 
 public class Utils {
     public static long getMillisFromEpoch(long epoch) {
-        return epoch * Constants.MillisInSecond;
+        return epoch * Constants.MILLIS_IN_SECOND;
     }
 
     public static void initializeApplication() {

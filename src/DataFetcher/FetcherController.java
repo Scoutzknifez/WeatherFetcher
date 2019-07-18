@@ -18,7 +18,7 @@ import java.util.Iterator;
 public class FetcherController {
     private static String lat = "33.513833";
     private static String lon = "-117.103338";
-    private static String url = Constants.WEB_SERVER + Constants.API_KEY + "/" + lat + "," + lon + Constants.additionalArgs;
+    private static String url = Constants.WEB_SERVER + Constants.API_KEY + "/" + lat + "," + lon + Constants.ADDITIONAL_ARGS;
 
     public static void fetchWeather() {
         try {
