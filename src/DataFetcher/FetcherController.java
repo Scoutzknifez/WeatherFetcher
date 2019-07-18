@@ -119,9 +119,6 @@ public class FetcherController {
             TimeAtMoment hourTime = new TimeAtMoment(FetchedData.hourWeathers.get(hourIndex).getTime());
             TimeAtMoment dayStartTime = new TimeAtMoment( FetchedData.dayWeathers.get(dayIndex).getTime());
 
-
-            // Assign hours to a day
-
             // First index of hour will ALWAYS be the same day you are in at index 0
             if(!hourTime.isSameDay(dayStartTime))
                 dayIndex++;
@@ -129,14 +126,6 @@ public class FetcherController {
             int indexOfHour = hourTime.getHour();
             FetchedData.dayWeathers.get(dayIndex).getHourlyWeather()[indexOfHour] = FetchedData.hourWeathers.get(hourIndex);
             hourIndex++;
-        }
-
-        for(DayWeather d : FetchedData.dayWeathers) {
-            System.out.println(d);
-            for(int h = 0; h < d.getHourlyWeather().length; h++) {
-                HourWeather hour = d.getHourlyWeather()[h];
-                System.out.println("Of hour " + h + ": " + hour);
-            }
         }
     }
 }

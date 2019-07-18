@@ -11,11 +11,21 @@ public class DayWeather extends HumidWeather {
     }
 
     public double getHighTemperature() {
-        return 0;
+        double high = getTemperature();
+        for(HourWeather h : getHourlyWeather()) {
+            if(h != null && high < h.getTemperature())
+                high = h.getTemperature();
+        }
+        return high;
     }
 
     public double getLowTemperature() {
-        return 0;
+        double low = getTemperature();
+        for(HourWeather h : getHourlyWeather()) {
+            if(h != null && low > h.getTemperature())
+                low = h.getTemperature();
+        }
+        return low;
     }
 
     public String toString() {
