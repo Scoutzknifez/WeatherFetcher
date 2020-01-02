@@ -7,9 +7,12 @@ import lombok.Setter;
 
 import java.util.Arrays;
 
-@AllArgsConstructor @NoArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class DayWeather extends WeatherParent {
-    @Getter @Setter private HourWeather[] hourlyWeather = new HourWeather[24];
+    private HourWeather[] hourlyWeather = new HourWeather[24];
 
     public double getHighTemperature() {
         double high = getTemperature();
