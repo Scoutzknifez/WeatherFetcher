@@ -1,10 +1,7 @@
 package DataFetcher;
 
-import DataStructures.CurrentWeather;
-import DataStructures.DayWeather;
-import DataStructures.HourWeather;
-import DataStructures.TimeAtMoment;
-import Utility.Constants;
+import DataStructures.*;
+import Utility.HiddenConstants;
 import Utility.Utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,12 +11,14 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class FetcherController {
     private static String lat = "33.513833";
     private static String lon = "-117.103338";
-    private static String url = Constants.WEB_SERVER + Constants.API_KEY + "/" + lat + "," + lon + Constants.ADDITIONAL_ARGS;
+
+    private static String url = HiddenConstants.WEB_SERVER + HiddenConstants.API_KEY + "/" + lat + "," + lon + HiddenConstants.ADDITIONAL_ARGS;
 
     public static void fetchWeather() {
         try {
@@ -50,13 +49,8 @@ public class FetcherController {
         getCurrentWeather(currentNode);
     }
 
-    private static void getCurrentWeather(JsonNode current) {
-        long time = System.currentTimeMillis() / 1000;
-        String summary = current.path("summary").asText();
-        String icon = current.path("icon").asText();
-        double temperature = current.path("temperature").asDouble();
-
-        FetchedData.currentWeather = new CurrentWeather(time, summary, icon, temperature);
+    private static void getCurrentWeather(JsonNode currentNode) {
+        FetchedData.currentWeather = getWeatherByNode(currentNode, CurrentWeather.class);
     }
 
     private static void doHourly(JsonNode root) {
@@ -65,23 +59,9 @@ public class FetcherController {
         getHourlyWeather(hourlyDataNode);
     }
 
+    @SuppressWarnings("unchecked")
     private static void getHourlyWeather(JsonNode hourlyNode) {
-        Iterator<JsonNode> hours = hourlyNode.elements();
-        ArrayList<HourWeather> hourWeathers = new ArrayList<>();
-
-        while (hours.hasNext()) {
-            JsonNode day = hours.next();
-
-            long time = day.path("time").asLong();
-            String summary = day.path("summary").asText();
-            String icon = day.path("icon").asText();
-            double temperature = day.path("temperature").asDouble();
-            double humidity = day.path("humidity").asDouble();
-
-            hourWeathers.add(new HourWeather(time, summary, icon, temperature, humidity));
-        }
-
-        FetchedData.hourWeathers = hourWeathers;
+        FetchedData.hourWeathers = (ArrayList<HourWeather>) makeWeatherForNode(hourlyNode, HourWeather.class);
     }
 
     private static void doDaily(JsonNode root) {
@@ -90,23 +70,9 @@ public class FetcherController {
         getDailyWeather(dailyDataNode);
     }
 
+    @SuppressWarnings("unchecked")
     private static void getDailyWeather(JsonNode dailyNode) {
-        Iterator<JsonNode> days = dailyNode.elements();
-        ArrayList<DayWeather> dayWeathers = new ArrayList<>();
-
-        while (days.hasNext()) {
-            JsonNode day = days.next();
-
-            long time = day.path("time").asLong();
-            String summary = day.path("summary").asText();
-            String icon = day.path("icon").asText();
-            double temperature = day.path("temperatureHigh").asDouble();
-            double humidity = day.path("humidity").asDouble();
-
-            dayWeathers.add(new DayWeather(time, summary, icon, temperature, humidity));
-        }
-
-        FetchedData.dayWeathers = dayWeathers;
+        FetchedData.dayWeathers = (ArrayList<DayWeather>) makeWeatherForNode(dailyNode, DayWeather.class);
     }
 
     private static void delegateHours() {
@@ -115,9 +81,8 @@ public class FetcherController {
 
         // Check to ensure that the indexes are contained in the lists of fetched data.
         while((dayIndex < FetchedData.dayWeathers.size()) && (hourIndex < FetchedData.hourWeathers.size())) {
-
-            TimeAtMoment hourTime = new TimeAtMoment(FetchedData.hourWeathers.get(hourIndex).getTime());
-            TimeAtMoment dayStartTime = new TimeAtMoment( FetchedData.dayWeathers.get(dayIndex).getTime());
+            TimeAtMoment hourTime = new TimeAtMoment(Utils.getMillisFromEpoch(FetchedData.hourWeathers.get(hourIndex).getTime()));
+            TimeAtMoment dayStartTime = new TimeAtMoment(Utils.getMillisFromEpoch(FetchedData.dayWeathers.get(dayIndex).getTime()));
 
             // First index of hour will ALWAYS be the same day you are in at index 0
             if(!hourTime.isSameDay(dayStartTime))
@@ -126,6 +91,40 @@ public class FetcherController {
             int indexOfHour = hourTime.getHour();
             FetchedData.dayWeathers.get(dayIndex).getHourlyWeather()[indexOfHour] = FetchedData.hourWeathers.get(hourIndex);
             hourIndex++;
+        }
+    }
+
+    private static ArrayList<? extends WeatherParent> makeWeatherForNode(JsonNode weatherTypeNode, Class<? extends WeatherParent> clazz) {
+        Iterator<JsonNode> nodes = weatherTypeNode.elements();
+        ArrayList<WeatherParent> weatherParents = new ArrayList<>();
+
+        while(nodes.hasNext()) {
+            JsonNode node = nodes.next();
+            weatherParents.add(getWeatherByNode(node, clazz));
+        }
+
+        return weatherParents;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends WeatherParent> T getWeatherByNode(JsonNode jsonNode, Class<? extends WeatherParent> clazz) {
+        try {
+            WeatherParent weatherType = clazz.newInstance();
+
+            weatherType.setTime(jsonNode.path("time").asLong());
+            weatherType.setSummary(jsonNode.path("summary").asText());
+            weatherType.setIcon(jsonNode.path("icon").asText());
+            weatherType.setTemperature(jsonNode.path(
+                    weatherType instanceof DayWeather ? "temperatureHigh" : "temperature").asDouble());
+            weatherType.setPrecipitationProbability(jsonNode.path("precipProbability").asDouble());
+            weatherType.setHumidity(jsonNode.path("humidity").asDouble());
+            weatherType.setWindSpeed(jsonNode.path("windSpeed").asInt());
+            weatherType.setWindBearing(jsonNode.path("windBearing").asInt());
+
+            return (T) weatherType;
+        } catch (Exception e) {
+            Utils.log("Could not parse Weather into type %s", clazz.getName());
+            return null;
         }
     }
 }

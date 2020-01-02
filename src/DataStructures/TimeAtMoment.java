@@ -9,9 +9,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@AllArgsConstructor @Getter @Setter
+@AllArgsConstructor
+@Getter
+@Setter
 public class TimeAtMoment {
-    private long epoch;
+    private long millis;
     private int year;
     private int month;
     private int day;
@@ -19,9 +21,18 @@ public class TimeAtMoment {
     private int minute;
     private int second;
 
-    public TimeAtMoment(long epoch) {
-        setEpoch(epoch);
-        Date date = new Date(Utils.getMillisFromEpoch(epoch));
+    public TimeAtMoment(long time) {
+        setMillis(time);
+        refreshTime();
+    }
+
+    public void addTime(long time) {
+        setMillis(getMillis() + time);
+        refreshTime();
+    }
+
+    public void refreshTime() {
+        Date date = new Date(getMillis());
         DateFormat format = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
         String formatted = format.format(date);
         String[] splits = formatted.split(":");
@@ -33,16 +44,52 @@ public class TimeAtMoment {
             minute = Integer.parseInt(splits[4]);
             second = Integer.parseInt(splits[5]);
         } catch (Exception e) {
-            System.out.println("Can not properly create TimeAtMoment object.");
+            Utils.log("Can not properly create TimeAtMoment object.");
         }
     }
 
-    public boolean isSameDay(TimeAtMoment compareTo) {
-        return compareTo.getDay() == getDay();
+    public boolean isSameDay(TimeAtMoment time) {
+        return getYear() == time.getYear() &&
+                getMonth() == time.getMonth() &&
+                getDay() == time.getDay();
+    }
+
+    public String getDateFormat() {
+        return getMonth() + "/" + getDay() + "/" + getYear();
     }
 
     @Override
     public String toString() {
-        return getYear() + "/" + getMonth() + "/" + getDay() + " " + getHour() + ":" + getMinute() + ":" + getSecond();
+        StringBuilder sb = new StringBuilder();
+        String section;
+
+        if(getHour() > 12) {
+            section = (getHour() - 12) + ":";
+        } else {
+            section = (getHour()) + ":";
+        }
+        sb.append(section);
+
+        if(getMinute() < 10) {
+            section = "0" + getMinute() + ":";
+        } else {
+            section = "" + getMinute() + ":";
+        }
+        sb.append(section);
+
+        if(getSecond() < 10) {
+            section = "0" + getSecond();
+        } else {
+            section = "" + getSecond();
+        }
+        sb.append(section);
+
+        if(getHour() > 12) {
+            sb.append(" PM");
+        } else {
+            sb.append(" AM");
+        }
+
+        return sb.toString();
     }
 }

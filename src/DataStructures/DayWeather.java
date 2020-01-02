@@ -1,14 +1,15 @@
 package DataStructures;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-public class DayWeather extends HumidWeather {
-    @Getter @Setter private HourWeather[] hourlyWeather = new HourWeather[24];
+import java.util.Arrays;
 
-    public DayWeather(long time, String summary, String icon, double temperature, double humidity) {
-        super(time, summary, icon, temperature, humidity);
-    }
+@AllArgsConstructor @NoArgsConstructor
+public class DayWeather extends WeatherParent {
+    @Getter @Setter private HourWeather[] hourlyWeather = new HourWeather[24];
 
     public double getHighTemperature() {
         double high = getTemperature();
@@ -28,7 +29,12 @@ public class DayWeather extends HumidWeather {
         return low;
     }
 
+    @Override
     public String toString() {
-        return "Day:{time:" + getTime() + ",summary:" + getSummary() + ",icon:" + getIcon() + ",temperature:" + getTemperature() + ",humidity:" + getHumidity() + "}";
+        double[] temps = new double[24];
+        for (int i = 0; i < temps.length; i++)
+            temps[i] = (getHourlyWeather()[i] != null ? getHourlyWeather()[i].getTemperature() : 0);
+
+        return "Day:{time:" + getTime() + ",summary:" + getSummary() + ",icon:" + getIcon() + ",temperature:" + getTemperature() + ",humidity:" + getHumidity() + ",high:" + getHighTemperature() + ",low:" + getLowTemperature() + ",hourlyTemps:" + Arrays.toString(temps) + "}";
     }
 }

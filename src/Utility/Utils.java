@@ -1,6 +1,7 @@
 package Utility;
 
 import DataFetcher.FetcherController;
+import DataStructures.TimeAtMoment;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -15,8 +16,22 @@ public class Utils {
         if(Constants.hasInternet) {
             FetcherController.fetchWeather();
         } else {
-            System.out.println("No internet connection!");
+            Utils.log("No internet connection!");
         }
+    }
+
+    /**
+     * Sends a message out to console with time stamp of log execution
+     *
+     * NOTE: use %s to replace part of string with object
+     *
+     * @param message   message to display with replaceable characters for objects
+     * @param objects   Objects to replace inside of the message string
+     */
+    public static void log(String message, Object... objects) {
+        TimeAtMoment timeAtMoment = new TimeAtMoment(System.currentTimeMillis());
+
+        System.out.println("[" + timeAtMoment + "] " + String.format(message, objects));
     }
 
     public static boolean isEmptyJsonString(String string) {
@@ -25,17 +40,13 @@ public class Utils {
 
     public static boolean hasInternetConnection() {
         boolean status = false;
-        Socket socket = new Socket();
-        InetSocketAddress address = new InetSocketAddress("www.google.com", 80);
-        try {
+        try (Socket socket = new Socket()) {
+            InetSocketAddress address = new InetSocketAddress("www.google.com", 80);
             socket.connect(address, 1500);
-            if(socket.isConnected())
+            if (socket.isConnected())
                 status = true;
         } catch (Exception e) {
-        } finally {
-            try {
-                socket.close();
-            } catch (Exception e) {}
+            Utils.log("No internet connection available!");
         }
         return status;
     }
