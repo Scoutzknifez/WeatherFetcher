@@ -12,6 +12,7 @@ import java.util.Arrays;
 @Getter
 @Setter
 public class DayWeather extends WeatherParent {
+    private long sunsetTime;
     private HourWeather[] hourlyWeather = new HourWeather[24];
 
     public double getHighTemperature() {
